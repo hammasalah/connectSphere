@@ -1,4 +1,8 @@
 /* Header styling */
+body {
+    background-color: #f5f5f5; /* Darker white background */
+}
+
 header {
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);

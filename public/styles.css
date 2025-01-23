@@ -1,0 +1,174 @@
+/* Header styling */
+header {
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px 50px;
+   
+}
+
+/* Container for flex alignment */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Logo styling */
+.logo {
+    display: flex;
+    align-items: center;
+    gap:20px;
+}
+
+.logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Navigation links */
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-links button {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    font-weight: bold;
+    /* text-align: left; */
+}
+
+.nav-links .active {
+    color: #ff5722;
+    border-bottom: 2px solid #ff5722;
+}
+
+/* Authentication buttons */
+.auth {
+    display: flex;
+    gap: 15px;
+}
+
+.login {
+    background: none;
+    border: 2px solid #ff5722;
+    color: #ff5722;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.signup {
+    background: #ff5722;
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+    }
+}
+
+   /* Hero section container */
+.hero-section {
+    position: relative;
+    width: 100%;
+    height: 100%; /* Adjust height as needed */
+    overflow: hidden;
+}
+
+/* Background image styling */
+.hero-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the area */
+    display: block;
+}
+
+/* Overlay text and button styling */
+.overlay {
+    background-color: rgba(128, 128, 128, 0.5);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: rgb(255, 255, 255);
+    font-size: 1vw ;
+    font-weight: bold;
+    width: 80%; /* Adjust width as needed */
+}
+
+.overlay p {
+    font-size: 2vw;
+    font-weight: normal;
+    margin-top: 10px;
+    color: #ffffff;
+}
+
+
+
+
+/* Modal styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.63);
+    
+    
+}
+
+/* Modal content box */
+.modal-content {
+    
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+    border-radius: 20px;
+}
+
+/* Close button */
+.close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+
+.modal form {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 10px;
+}
+
+   
+   

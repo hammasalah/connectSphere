@@ -1,0 +1,266 @@
+{# {# templates/events/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+.location-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: white;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .location-button:hover {
+        background: #f0f0f0;
+    }
+
+    .user-location-popup {
+        color: #333;
+        font-weight: bold;
+    }
+ .map-popup {
+        max-width: 250px;
+    }
+    
+    .map-popup img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+    
+    .map-popup h3 {
+        margin: 0 0 8px 0;
+        color: #333;
+    }
+    
+    .map-popup .event-date {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    
+    .map-popup .rsvp-button {
+        margin-top: 8px;
+    }
+    .events-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    .event-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .event-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .event-content {
+        padding: 1rem;
+    }
+    .event-date {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    .event-description {
+        margin-bottom: 1rem;
+    }
+    .rsvp-button {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background-color: #ff5c39;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    #map {
+        height: 800px;
+        width : 100%;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+    .view-all-events {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: #ff5c39;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        float: right;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="events-container">
+    <h1>Event Suggestions</h1>
+    
+    <div class="events-grid">
+        {% for event in events %}
+            <div class="event-card">
+                {% if event.image %}
+                    <img src="{{ asset(event.image) }}" alt="{{ event.title }}" class="event-image">
+                {% endif %}
+                <div class="event-content">
+                    <h2>{{ event.title }}</h2>
+                    <div class="event-date">{{ event.date|date('M d, Y') }}</div>
+                    <p class="event-description">{{ event.description }}</p>
+                    <a href="" class="rsvp-button">RSVP</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Event Locations</h2>
+    <div id="map"></div>
+
+    <a href="" class="view-all-events">View All Events</a>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+   
+  document.addEventListener('DOMContentLoaded', function() {
+        var events = {{ events|json_encode|raw }};
+        var userMarker = null;
+        var userCircle = null;
+        
+        // Calculate map center from events
+        var latitudes = events.map(event => event.latitude);
+        var longitudes = events.map(event => event.longitude);
+        var centerLat = (Math.max(...latitudes) + Math.min(...latitudes)) / 2;
+        var centerLng = (Math.max(...longitudes) + Math.min(...longitudes)) / 2;
+        
+        // Initialize map
+        var map = L.map('map').setView([centerLat, centerLng], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Create custom user location icon
+        var userIcon = L.divIcon({
+            html: `<svg width="24" height="24" viewBox="0 0 24 24" fill="#2196F3">
+                    <circle cx="12" cy="12" r="8" fill="white"/>
+                    <circle cx="12" cy="12" r="6" fill="#2196F3"/>
+                  </svg>`,
+            className: 'user-location-marker',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+
+        // Add location control button
+        var locationButton = L.DomUtil.create('button', 'location-button');
+        locationButton.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="8"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>`;
+        document.body.appendChild(locationButton);
+
+        // Function to handle location found
+        function onLocationFound(e) {
+            var radius = e.accuracy / 2;
+
+            // Remove existing user location markers if they exist
+            if (userMarker) {
+                map.removeLayer(userMarker);
+            }
+            if (userCircle) {
+                map.removeLayer(userCircle);
+            }
+
+            // Add user marker
+            userMarker = L.marker(e.latlng, {icon: userIcon})
+                .addTo(map)
+                .bindPopup('<div class="user-location-popup">You are here</div>');
+
+            // Add accuracy circle
+            userCircle = L.circle(e.latlng, {
+                radius: radius,
+                color: '#2196F3',
+                fillColor: '#2196F3',
+                fillOpacity: 0.15,
+                weight: 1
+            }).addTo(map);
+
+            // Center map on user location
+            map.setView(e.latlng, 14);
+        }
+
+        // Function to handle location error
+        function onLocationError(e) {
+            alert("Couldn't find your location: " + e.message);
+        }
+
+        // Location button click handler
+        locationButton.addEventListener('click', function() {
+            map.locate({
+                setView: true,
+                maxZoom: 14,
+                enableHighAccuracy: true
+            });
+        });
+
+        // Map event handlers
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+
+        // Add event markers
+        var bounds = L.latLngBounds();
+        events.forEach(function(event) {
+            var popupContent = `
+                <div class="map-popup">
+                    <img src="${event.image}" alt="${event.title}">
+                    <h3>${event.title}</h3>
+                    <div class="event-date">${new Date(event.date).toLocaleDateString()}</div>
+                    <div>${event.description}</div>
+                    <a href="/events/rsvp/${event.id}" class="rsvp-button">RSVP</a>
+                </div>
+            `;
+            
+            var marker = L.marker([event.latitude, event.longitude])
+                .addTo(map)
+                .bindPopup(popupContent);
+                
+            bounds.extend([event.latitude, event.longitude]);
+        });
+        
+        map.fitBounds(bounds, {
+            padding: [50, 50]
+        });
+
+        // Initially request user location
+        map.locate({
+            setView: false,
+            enableHighAccuracy: true
+        });
+    });
+</script>
+{% endblock %} 

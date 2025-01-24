@@ -15,14 +15,40 @@
             
         </div>
     </div>
+     <div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeRegisterModal()">&times;</span>
+        <h2>Register</h2>
+        <form id="registerForm" action="{{ path('register') }}" method="post">
+         <label for="name">username:</label>
+            <input type="text" id="username" name="_username" required>
+
+        <label for="name">name:</label>
+            <input type="text" id="name" name="_name" required>
+
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="_last_name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="username" name="_email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="_password" required>
+
+            <button type="submit" class="signup">Sign Up </button>
+        </form>
+        <div id="loadingIndicator" style="display:none;">Loading...</div>
+    </div>
+    
+</div>
 
     <div id="loginModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
         <h2>Login</h2>
         <form action="{{ path('login') }}" method="post">
-            <label for="username">Email:</label>
-            <input type="text" id="username" name="_username" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="_email" required>
 
             <label for="password">Password:</label>
             <input type="password" id="password" name="_password" required>
@@ -30,5 +56,6 @@
             <button type="submit" class="signup">Login</button>
         </form>
     </div>
+    
 </div>
 {% endblock %}

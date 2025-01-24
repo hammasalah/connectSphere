@@ -5,14 +5,32 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Users;
 class LoginController extends AbstractController
 {
     /**
-     * @Route("/login", name="login")
+     * @Route("/login", name="login" , methods={"POST"})
      */
-    public function login(): Response
+    public function login(Request $request , EntityManagerInterface $entityManager): Response
     {
+
+        // tekhdh email and password from form 
+        $email=$request->request->get('_email');
+        $password=$request->request->get('_password');
+
+
+        // check the email and password 
+
+        $user = $entityManager->getRepository(Users::class)->findOneByEmail($email);
+
+        // navigate to feed if successful 
+       if($user!==null)
+    {       $passwd=$user->getPassword();
+        if($passwd==$password)
+        {
+           
         $events = [
             [
                 'id' => 1,
@@ -53,7 +71,21 @@ class LoginController extends AbstractController
         ];
         return $this->render('feed.html.twig', [
             'events' => $events
-        ]);
+        ]);    
+        }else{
+            return new Response('incorrect password');
+        }
+    
+}else {
+    return new Response('User not found');
+}
+
+        // don't navigate to feed if not successful
+
+
+            
+
+
     }
 
    
